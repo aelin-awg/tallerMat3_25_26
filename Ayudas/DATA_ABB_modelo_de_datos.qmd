@@ -1,5 +1,5 @@
 ---
-title: "Carga de datos para taller 2024-2025"
+title: "Carga de datos para taller 2025-2026"
 author: "Taller"
 lang: es
 format:

@@ -1,5 +1,5 @@
 ---
-title: "ENUNCIADO taller en grupo Mat3 GIN 2024-2025"
+title: "ENUNCIADO taller en grupo Mat3 GIN 2025-2026"
 author: "Taller"
 lang: es
 format:
