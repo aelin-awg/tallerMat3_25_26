@@ -64,22 +64,22 @@ listings0 = listings_common0 %>%
          room_type)
 ```
 
-Hemos seleccionado las variables que nos parecen más interesantes y hemos guardado el objeto como `listings_common0_select.RData` en `clean_data/mallorca/`
-
 
 **listings**
 
-Hemos cargado el objeto `listings0` que contiene los datos varios  periodos de apartamentos de inside Airbnb de Mallorca seleccionando cuantas variables nos parecen más interesantes.
+Generamos la  tibble `listings0` con datos DE  8 periodos  DE  apartamentos de inside Airbnb de Mallorca Y  seleccionando cuantas variables nos parecen más interesantes.
 
-Separararemos la fecha del scrapping que es eb la que se observon el fichero y nos quedaremos con los apartamentos que aparecen en las 9 periodos scrapeados.
+Separararemos la fecha del scrapping que es en la que se observaron  los datos de cada apartamento  nos quedaremos con los apartamentos que aparecen en las 8 periodos "scrapeados".
 
 ```{r}
-listings0= listings0 %>% mutate(date=as.Date(substr(as.character(scrape_id),1,8),
-                                             format="%Y%m%d"),
-                                .after=id)
+listings0= listings0 %>% 
+  mutate(date=as.Date(substr(
+    as.character(scrape_id),1,8),
+    format="%Y%m%d"),
+    .after=id)
 ```
 
-Ahora veamos la fechas de los sceapings y el número de veces que aparecen 
+Ahora  analizamos  las fechas de los scrapings y el número de veces que aparecen 
  cada  apartamentos.
 
 
@@ -190,7 +190,8 @@ Calcular la proporción de apartamentos de la muestra "2025-09-21" con media de 
 
 Calcular la proporción de apartamentos de los periodos 2025-06-15 y  2025-09-21  con media de valoración `review_scores_rating` mayor que 4 en Palma  y en Pollença son iguales contra que son distintas.
 
-### Pregunta 7 
+## Pregunta 8 (**1punto**)
+
 Agrupa las variables `review_scores_rating` y `review_scores_location` de `listings0` en 5 categorías cada una y construid una tabla de contingencia con las dos variables agrupadas. Agrupar de forma que no cruces de categorías vacías. Contratar si esta varibles son independientes con  un test $\chi^2$. 
 
 Buscan información sobre el coeficiente de contingencia de Carl Pearson, cacularlo desde  la salida de chisq.test interpretarlo  en esta caso
@@ -210,9 +211,9 @@ review_scores_rating, review_scores_cleanliness, review_scores_location, review_
 
 Calcula la matriz de correlaciones entre estas variables y haz un gráfico de pares (pair plot) con la librería GGally. Comenta los resultados.
 
-Haz un matrixplot de las correlaciones con la librería corrplot. Comenta los resultados.
+Haz un `matrixplot` de las correlaciones con la librería `corrplot`. Comenta los resultados.
 
-## Pregunta 9 (**2 puntos**)
+## Pregunta 10 (**2 puntos**)
 
 La [Zipf's law es una ley empírica](https://en.wikipedia.org/wiki/Zipf%27s_law#Word_frequencies_in_natural_languages) que dice que la frecuencia de las palabras en un texto es inversamente proporcional a su rango. Decidid si la ley se ajusta a los datos de la longitud de los comentarios de los apartamentos de la muestra "2025-09-21" Mallorca, haced lo mismo para description de `listings0`. Para ello, haced un análisis de regresión lineal de la frecuencia de las longitudes de los comentarios/descripciones de los apartamentos de Mallorca y el rango de las longitudes de los comentarios. Justificad la respuesta, estadísticamente y gráficamente.
 
