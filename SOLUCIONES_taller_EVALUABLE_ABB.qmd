@@ -158,6 +158,28 @@ Responder las siguientes preguntas con formato Rmarkdown (.Rmd) o quarto (.qmd) 
 Del fichero con los datos de listings `listings0` calcula los estadísticos descriptivos de las variable `price` y de la variable `number_of_reviews` agrupados por municipio y por periodo.
 
 Presenta los resultados con una tabla de kableExtra.
+```{r}
+estadisticos <- listings0 %>% 
+  group_by(neighbourhood_cleansed, date) %>%
+  summarise( Numero=n(),
+            mean_price = mean(price, na.rm = TRUE),
+            sd_price = sd(price, na.rm = TRUE),
+            mean_reviews = mean(number_of_reviews, na.rm = TRUE),
+            sd_reviews = sd(number_of_reviews, na.rm = TRUE)
+  ) %>%
+  ungroup()
+head(estadisticos)
+```
+
+Presentación de los datos con una tabla de KableExtra:
+```{r}
+library(kableExtra)
+estadisticos %>%
+  kable(caption="Estadísticos descriptivos de Price y Number of reviews por Municipio y Periodo") %>%
+  kable_styling(bootstrap_options=c("striped","hover", "condensed"), full_width=FALSE)
+```
+
+
 
 ## Pregunta 2 (**1punto**)
 
