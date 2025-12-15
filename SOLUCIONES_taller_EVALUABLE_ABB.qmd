@@ -193,7 +193,7 @@ Con los datos de `listings0` de todos los periodos, contrastar si la media del p
 
 ## Pregunta 4 (**1punto**)
 
-Con los  datos de `listings0`, contrastar si las medias de los precios en Alcudia entre los periodos  2025-06-15 y   2025-09-21 son iguales contra que son menores en 2023. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste.
+Con los  datos de `listings0`, contrastar si las medias de los precios en Alcudia entre los periodos  2025-06-15 y   2025-09-21 son iguales contra que son menores. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste.
 
 Haced un diagrama de caja comparativo de los precios  en Alcudia  por periodo y coméntalo.
 
