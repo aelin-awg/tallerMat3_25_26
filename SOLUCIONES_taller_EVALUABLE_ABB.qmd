@@ -194,7 +194,6 @@ Con los datos de `listings0`, contrastar si las medias de los precios en Alcudia
 
 Haced un diagrama de caja comparativo de los precios en Alcudia por periodo y coméntalo.
 
-
 ## Pregunta 5 (**1 punto**)
 
 Comparar con un bopxlot de las valoraciones medias `review_scores_rating` para Alcudia, Palma, Calvià y Pollença. Hacer el gráfico con ggplot2 y todo lujo de destalles.
@@ -281,7 +280,6 @@ Análisis para description:
 
 ```{r}
 aux_d = table(length_description)
-
 tbl_d = tibble(L=as.numeric(names(aux_d)), Freq=as.numeric(aux_d), Rank=rank(-Freq, ties.method="first"), Log_Freq=log(Freq), Log_Rank=log(Rank))
 
 
@@ -294,14 +292,15 @@ summary(sol_d)
 Gráfico Zipf para descriptions:
 
 ```{r}
-plot(tbl_d2$Log_Rank, tbl_d2$Log_Freq, main="Zipf - Descriptions(Mallorca)", xlab="loq(Rank)", ylab="log(Freq)", pch=19, col="darkgray")
+plot(tbl_d2$Log_Rank, tbl_d2$Log_Freq, main="Zipf - Descriptions(Mallorca)", xlab="log(Rank)", ylab="log(Freq)", pch=19, col="darkgray")
 
 abline(sol_d, col="blue", lwd=2)
 ```
 
-Para analizar si la ley de Zipf se ajusta a los daros, se ha estudiado la relacion entre la frecuencia de las longitudes de los comentarios i su rango. Segun la ley de Zipf, esta realcion tiene que ser de tipo potencial, cosa que implica una relacion lineal entre loq(Freq) i log(Rank).
+Para analizar si la ley de Zipf se ajusta a los datos, se ha estudiado la relacion entre la frecuencia de las longitudes de los comentarios y su rango. Segun la ley de Zipf, esta realcion tiene que ser de tipo potencial, cosa que implica una relacion lineal entre log(Freq) y log(Rank).
 
-En ambos casos (reviews i descriptions), la regresión lineal del model $log(Freq)$ \~ $loq(Rank)$ muestra un coeficiente negativo i estadísticamente significativo, con un valor de $R^2$ moderadamente elevado.
+En ambos casos (reviews y descriptions), la regresión lineal del model $log(Freq)$ \~ $log(Rank)$ muestra un coeficiente negativo y estadísticamente significativo, con un valor de $R^2$ moderadamente elevado.
 
 Gráficamente, los puntos en escala log-log se alinean aproximadamente en torno a una recta, indicando que los datos siguen un comportamiento compatible con la ley de Zipf, aunque con desviaciones en los extremos del rango, hecho habitual en datos empíricos reales.
 
+En conclusión, los resultados obtenidos muestran que la distribución de longitudes tanto en los comentarios como en las descripciones de los apartamentos de Mallorca siguen un patrón compatible con la lley de Zipf, con una relación log-log significativa y una alineación gráfica clara.
