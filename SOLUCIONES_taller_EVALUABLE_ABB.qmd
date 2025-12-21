@@ -164,11 +164,12 @@ Obtenemos los siguientes estadísticos descriptivos tanto del precio como del n�
 ```{r}
 estadisticos <- listings0 %>% 
   group_by(neighbourhood_cleansed, date) %>%
-  summarise( Numero=n(),
-            mean_price = mean(price, na.rm = TRUE),
-            sd_price = sd(price, na.rm = TRUE),
-            mean_reviews = mean(number_of_reviews, na.rm = TRUE),
-            sd_reviews = sd(number_of_reviews, na.rm = TRUE)
+  summarise( 
+    Numero=n(),
+    mean_price = mean(price, na.rm = TRUE),
+    sd_price = sd(price, na.rm = TRUE),
+    mean_reviews = mean(number_of_reviews, na.rm = TRUE),
+    sd_reviews = sd(number_of_reviews, na.rm = TRUE)
   ) %>%
   ungroup()
 head(estadisticos)
@@ -232,6 +233,71 @@ Construye un data set con las variables review_scores_rating, review_scores_clea
 Calcula la matriz de correlaciones entre estas variables y haz un gráfico de pares de variables que muestre las correlaciones ([ggpairs](https://r-charts.com/correlation/ggpairs/)) con la librería GGally. Comenta los resultados.
 
 Haz un `matrixplot` de las correlaciones con la librería `corrplot`. Comenta los resultados.
+
+### SOLUCIÓN
+
+Construimos el data set con las variables indicadas y mostramos las primeras filas, poniendo el municipio en la primera columna para mejor visualización:
+
+```{r}
+datos_scores <- listings0 %>%
+  select( 
+    neighbourhood_cleansed,
+    review_scores_rating,
+    review_scores_cleanliness,
+    review_scores_location,
+    review_scores_value
+  )
+head(datos_scores)
+```
+
+Calculamos la matriz de correlaciones de las variables numéricas (puntuaciones del 0 al 5) y generamos el gráfico de pares de variables con la librería GGally:
+
+```{r}
+# Calculamos la matriz
+variables_numericas <- datos_scores %>%
+  select(
+    review_scores_rating,
+    review_scores_cleanliness,
+    review_scores_location,
+    review_scores_value
+  )
+matriz_correlaciones <- cor(variables_numericas, use = "pairwise.complete.obs")
+
+# Generamos el gráfico
+library(GGally)
+ggpairs(variables_numericas,
+        title = "Gráfico de pares de puntuaciones de los apartamentos")
+```
+
+En la diagonal del gráfico se observan las distribuciones individuales (densidad) de cada variable. En el triángulo superior, se pueden observar los coeficientes de correlación cuya significancia se indica con los asteriscos (\*\*\*) de la misma forma que al calcular el p-valor con un test. En el triángulo inferior, se tienen los gráficos de dispersión entre pares de variables.
+
+De los coeficientes de correlación se puede decir que la localización de los apartamentos es la que menos influye en la puntuación global (rating), siendo la calidad (value) la más influyente de las analizadas. También se puede ver la relación entre una buena puntuación en limpieza (cleanliness) y una buena puntuación en calidad, que sugiere que la percepción de la calidad de un apartamento limpio es mucho mayor que la de un apartamento con más suciedad. Las dos variables de puntuación con menos relación entre sí son la limpieza y la localización, cuya independencia es lógica, puesto que no influyen mucho la una en la otra.
+
+Estas relaciones pueden observarse en los gráficos de dispersión de forma visual. La relación fuerte entre la puntuación global, la limpieza y la calidad es representada mediante una nube centrada en la diagonal, lo que sugiere que las puntuaciones en las tres categorías indicadas son similares entre sí, siendo la calidad la diagonal más visible y, por tanto, la más influyente. En cambio, el gráfico que relaciona la puntuación global con la localización es más disperso, lo que sugiere una menor relación entre ambas. De hecho, los gráficos que relacionan la localización son los menos lineales, lo que refuerza la afirmación anterior: es la variable menos influyente.
+
+Por lo tanto, se puede concluir que la puntuación global se ve muy influida por la limpieza y la calidad del apartamento y no tanto por la localización, cuyo valor no puede mejorarse de la misma forma que la limpieza y la calidad sí pueden. Todas las correlaciones son positivas y significativas, por lo que se puede deducir que los huéspedes tienden a puntuar las cuatro categorías de forma similar.
+
+Generamos un `matrixplot` de las correlaciones:
+
+```{r}
+library(corrplot)
+corrplot(
+  matriz_correlaciones,
+  method = "color",
+  type = "upper",
+  addCoef.col = "black",
+  tl.col = "black",
+  tl.srt = 45,
+  title = "Matriz de correlaciones de puntuaciones",
+  mar = c(0,0,2,0)
+)
+```
+
+Los valores en colores azules más oscuros indican una mayor correlación entre un par de variables, siendo la puntuación en una escala del -1 al 1, ambos inclusive.
+
+Este gráfico refuerza las afirmaciones realizadas anteriormente, recalcando la fuerte relación entre la puntuación global, la limpieza y la calidad de un apartamento y la menor influencia de la puntuación de la localización en todas las demás variables.
+
+En conclusión, la limpieza influye en la calidad y ambas influyen en la puntuación global, siendo la localización la menos influyente de las cuatro. Por lo tanto, los anfitriones podrían mejorar significativamente su puntuación global mejorando, si fuera posible, la limpieza y la calidad de los apartamentos.
 
 ## Pregunta 10 (**2 puntos**)
 
