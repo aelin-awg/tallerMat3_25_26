@@ -187,16 +187,70 @@ Consideremos las variables `price` y `number_of_reviews` de Pollença y Palma de
 Estudiad si estos datos se aproximan a una distribución normal gráficamente. Para ello, dibujad el histograma, la función "kernel-density" que aproxima la densidad y la densidad de la normal de media y varianza las de las muestras de las variables `price` (para precios mayores de 50 y menores de 400) y `number_of_reviews` para Palma y 	
 Pollença
 
+### SOLUCIÓN
+Para el análisis gráfico se representan histogramas normalizados `hist(freq = FALSE)` de las variables consideradas. La densidad se aproxima mediante una estimación kernel usando la función `density()`, que se superpone al histograma en color rojo mediante `polygon()` para facilitar la comparación visual.
+Finalmente, en color azul, se añade la densidad de una distribución normal con media y desviación estándar iguales a las muestrales de cada conjunto de datos, con el objetivo de evaluar gráficamente el grado de aproximación a la normalidad.
 ```{r}
 load("clean_data/mallorca/listing_common0_select.RData")
-df = subset(listings_common0_select, date=="2024-09-13" & (neighbourhood_cleansed=="Palma"|neighbourhood_cleansed=="Pollença"))
-precios = subset(df, price>50 & price<400)[["price"]]
-hist(precios, freq=FALSE, xlab="Precio", main="Histograma de precios entre 50 y 400", breaks=20)
-polygon(density(precios), col="#ff000044")
-hist(df[["number_of_reviews"]], freq=FALSE, main="Histograma de numero de reviews", xlab="Numero reviews", breaks=20)
-polygon(density(df[["number_of_reviews"]]), col="#ff000044")
+df_palma = subset(listings_common0_select, date=="2024-09-13" & neighbourhood_cleansed=="Palma de Mallorca")
+df_pollenca = subset(listings_common0_select, date=="2024-09-13" & neighbourhood_cleansed=="Pollença")
+precios_palma = subset(df_palma, price>50 & price<400)[["price"]]
+precios_pollenca = subset(df_pollenca, price>50 & price<400)[["price"]]
+
+hist(precios_palma, freq=FALSE, xlab="Precio", main="Histograma de precios en Palma entre 50 y 400", breaks=20)
+polygon(density(precios_palma), col="#ff000044")
+curve(dnorm(x,mean(precios_palma),sd(precios_palma)), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+hist(df_palma[["number_of_reviews"]], freq=FALSE, main="Histograma de número de reviews en Palma", xlab="Número de reviews", breaks=20)
+polygon(density(df_palma[["number_of_reviews"]]), col="#ff000044")
+curve(dnorm(x,mean(df_palma[["number_of_reviews"]]),sd(df_palma[["number_of_reviews"]])), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+hist(precios_pollenca, freq=FALSE, xlab="Precio", main="Histograma de precios en Pollença entre 50 y 400", breaks=20)
+polygon(density(precios_pollenca), col="#ff000044")
+curve(dnorm(x,mean(precios_pollenca),sd(precios_pollenca)), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+hist(df_pollenca[["number_of_reviews"]], freq=FALSE, main="Histograma de número de reviews en Pollença", xlab="Número de reviews", breaks=20)
+polygon(density(df_pollenca[["number_of_reviews"]]), col="#ff000044")
+curve(dnorm(x,mean(df_pollenca[["number_of_reviews"]]),sd(df_pollenca[["number_of_reviews"]])), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
 ```
-Se puede comprobar que ninguna de las graficas mostradas se asemeja a una distribución normal.
+Se puede comprobar comparando el histograma y la función de densidad con la normal que corresponde a la media y desviación estándard de cada conjunto de datos que ninguna de las graficas mostradas se asemeja a una distribución normal.
 
 ## Pregunta 3 (**1punto**)
 
