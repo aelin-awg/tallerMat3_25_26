@@ -191,7 +191,7 @@ Pollença
 
 Con los datos de `listings0` de todos los periodos, contrastar si la media del precio en Alcudia es igual a la de Palma **contra** que es mayor que en Palma para los precios mayores que 50 euros y menores de 400. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste. Justifica técnicamente la conclusión del contraste.
 
-
+### SOLUCIÓN
 Planteamos las hipótesis:
 
 $H_{0}:~~\mu_{alcudia}=\mu_{palma}$
