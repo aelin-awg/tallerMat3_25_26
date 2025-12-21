@@ -15,12 +15,6 @@ format:
     code-overflow: wrap
 ---
 
-```{r}
-```
-
-```{r}
-```
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE,
                       warning = FALSE,cache=FALSE)
@@ -157,6 +151,16 @@ Del fichero con los datos de listings `listings0` calcula los estadísticos desc
 
 Presenta los resultados con una tabla de kableExtra.
 
+### SOLUCIÓN
+
+Obtenemos los siguientes estadísticos descriptivos tanto del precio como del número de reseñas mediante la función summarise y mostramos las primeras filas de la tabla:
+
+-   Número de muestras $n$: es la cantidad de apartamentos disponibles en el municipio durante ese período.
+
+-   Media: precio medio de los apartamentos o número medio de reseñas según el municipio y el período.
+
+-   Desviación estándar: dispersión de precio o número de reseñas respecto a la media según el municipio y el período.
+
 ```{r}
 estadisticos <- listings0 %>% 
   group_by(neighbourhood_cleansed, date) %>%
@@ -170,7 +174,7 @@ estadisticos <- listings0 %>%
 head(estadisticos)
 ```
 
-Presentación de los datos con una tabla de KableExtra:
+Presentación de los datos completos con una tabla de KableExtra:
 
 ```{r}
 library(kableExtra)
@@ -178,6 +182,10 @@ estadisticos %>%
   kable(caption="Estadísticos descriptivos de Price y Number of reviews por Municipio y Periodo") %>%
   kable_styling(bootstrap_options=c("striped","hover", "condensed"), full_width=FALSE)
 ```
+
+Este análisis permite observar la evolución temporal del mercado de apartamentos turísticos ofertados en la isla.
+
+Se observan diferencias claras entre municipios en cuanto a número de apartamentos disponibles. También se aprecia un claro aumento del precio medio a medida que nos acercamos al presente. Por ejemplo, en el año 2023, en Palma, la media de precios era de 268.57€/noche, mientras que, en el año 2025, asciende a 517.49€/noche.
 
 ## Pregunta 2 (**1punto**)
 
@@ -267,7 +275,7 @@ sol3=lm(tbl2$Log_Freq~tbl2$Log_Rank)
 summary(sol3)
 ```
 
-###SOLUCION
+### SOLUCIÓN
 
 Gráfico Zipf(log-log) para las reviews:
 
