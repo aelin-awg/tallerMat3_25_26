@@ -262,6 +262,38 @@ Se puede comprobar comparando el histograma y la función de densidad con la nor
 
 Con los datos de `listings0` de todos los periodos, contrastar si la media del precio en Alcudia es igual a la de Palma **contra** que es mayor que en Palma para los precios mayores que 50 euros y menores de 400. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste. Justifica técnicamente la conclusión del contraste.
 
+### SOLUCIÓN
+Planteamos las hipótesis:
+
+$H_{0}:~~\mu_{alcudia}=\mu_{palma}$
+
+$H_{1}:~~\mu_{alcudia}>\mu_{palma}$
+
+Se filtran los anuncios para Palma y Alcúdia con $50<precio<400$
+```{r}
+listings_palma = subset(listings0, neighbourhood_cleansed=="Palma de Mallorca" & price>50 & price<400)
+listings_alcudia = subset(listings0, neighbourhood_cleansed=="Alcúdia" & price>50 & price<400)
+mean_palma = mean(listings_palma[["price"]])
+mean_alcudia = mean(listings_alcudia[["price"]])
+```
+
+$\mu_{palma}$ = `r mean_palma`
+
+$\mu_{alcudia}$ = `r mean_alcudia`
+
+Ahora se calcula el $p$-valor para determinar si se puede rechazar o no la hipótesis nula.
+
+Estos cálculos se realizan con nivel de significación $\alpha = 0.05$
+
+```{r}
+t = t.test(x = listings_alcudia["price"], y = listings_palma["price"], alternative = "greater")
+p_valor = t$p.value
+```
+
+Al realizar los cálculos se puede observar que $p$-valor = `r sprintf("%.10f", p_valor)`
+
+Si comparamos el $p$_valor con el nivel se significación $\alpha = 0.05$ se comprueba que $`r p_valor` < 0.05$ por tanto contamos con la evidencia estadística suficientes para rechazar $H_{0}$
+
 ## Pregunta 4 (**1punto**)
 
 Con los datos de `listings0`, contrastar si las medias de los precios en Alcudia entre los periodos 2025-06-15 y 2025-09-21 son iguales contra que son menores. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste.
