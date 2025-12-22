@@ -203,6 +203,103 @@ Con los datos de `listings0`, contrastar si las medias de los precios en Alcudia
 
 Haced un diagrama de caja comparativo de los precios en Alcudia por periodo y coméntalo.
 
+###SOLUCION
+
+Queremos comparar los precios medios en Alcúdia entre dos períodos: 2025-06-15 y 2025-09-21.
+
+$$
+\left\{\begin{array}{ll}
+H_0: & \mu_{Jun} \geq \mu_{Sep}\\
+H_1: & \mu_{Jun} < \mu_{Sep}
+\end{array}
+\right.
+$$
+
+```{r}
+#Cargamos los dos periodos
+
+library(tidyverse)
+
+listings_0625 = read.csv("data/mallorca/2025-06-15/listings.csv.gz")
+listings_0921 = read.csv("data/mallorca/2025-09-21/listings.csv.gz")
+```
+
+```{r}
+#Filtramos Alcúdia por los dos periodos
+alcudia_0625 = listings_0625 %>%
+  filter(neighbourhood_cleansed == "Alcúdia") %>%
+  select(price) %>%
+  mutate(date = as.Date("2025-06-15"))
+
+alcudia_0921 = listings_0921 %>%
+  filter(neighbourhood_cleansed == "Alcúdia") %>%
+  select(price) %>%
+  mutate(date = as.Date("2025-09-21"))
+
+#Unimos los dos periodos en un solo dataset
+alcudia = bind_rows(alcudia_0625, alcudia_0921)
+
+alcudia$price = as.numeric(
+  gsub("[^0-9.]", "", alcudia$price)
+) #Elimina €, $, comas, espacios, es a decir, los convierte en numéricos
+
+alcudia = alcudia %>% filter(!is.na(price)) #Eliminar posibles NA
+
+table(alcudia$date)
+```
+Mirando la teoria, podemos ver que para hacer el contraste de medias, debemos utilizar el caso estadístico VIII.
+
+$$
+\left\{\begin{array}{ll}
+H_0: & \mu_1 = \mu_2\\
+H_1: & \mu_1 < \mu_2
+\end{array}
+\right.
+$$
+
+$$ T = \frac{\overline{X}_1 - \overline{X}_2}{\tilde{S}_{1,2}} \sim t_f $$
+
+```{r}
+alcudia$date = factor(
+  alcudia$date,
+  levels = as.Date(c("2025-06-15", "2025-09-21"))
+)
+
+test <- t.test(
+  price ~ date,
+  data = alcudia,
+  alternative = "less",
+  conf.level = 0.95
+)
+
+test
+```
+
+Para comparar las medias de los precios en Alcúdia entre los periodos 2025-06-15 y 2025-09-21, se ha utilizado un contraste t Student para dos muestras independientes con varianzas desconocidas y no necesariamente iguales (caso VIII).
+
+A partir del contraste se obtiene un $p$-valor muy superior al 0.05, por lo que no hay evidencia estadística para rechazar la hipótesis nula. No podemos afirmar que los precios medios de los alojamientos en Alcúdia en el periodo 2025-06-15 sean menores que los del periodo 2025-09-21.
+
+El intervalo de confianza al 95% para la diferencia de medias ($\mu_{Jun}$ - $\mu_{Sep}$) incluye valores positivos y negativos, por lo que no permite concluir que exista una diferencia significativa entre ambos periodos.
+
+
+Finalmente, hacemos un diagrama de caja comparativo:
+
+```{r}
+boxplot(
+  price~date,
+  data=alcudia,
+  main="Precio en Alcúdia por periodo",
+  xlab="Periodo",
+  ylab="Precio",
+  col=c("lightblue", "lightgreen")
+)
+```
+
+El diagrama de caja muestra que los precios en el periodo 2025-09-21 tienden a ser más elevados que en el periodo 2025-06-15, con una mayor dispersión y presencia de valores extremos. Se observa un desplazamiento general de la distribución hacia valores más altos en septiembre, lo cual es coherente con el aumento de la demanda turística en temporada alta. Sin embargo, esta diferencia visual no es estadísticamente significativa según el contraste realizado.
+
+En conclusión, el contraste de medias entre los precios de Alcúdia en junio y en septiembre nos muestra un $p$-valor de 0.65007, muy superior al umbral de significación. Por lo tanto, no podemos afirmar que los precios de junio sean significativamente más bajos que los de septiembre. El boxplot nos muestra una media ligeramente superior en septiembre, pero las diferencias no son estadísticamente significativas.
+
+
 ## Pregunta 5 (**1 punto**)
 
 Comparar con un bopxlot de las valoraciones medias `review_scores_rating` para Alcudia, Palma, Calvià y Pollença. Hacer el gráfico con ggplot2 y todo lujo de destalles.
@@ -317,7 +414,7 @@ length_description=stringr::str_count(listings0$description,"\\w+")
 barplot(table(length_description))
 ```
 
-Y ahora se calculan los rango os lo dejo para reviews par desctption lo haceís vosotros
+Y ahora se calculan los rango os lo dejo para reviews para description lo haceís vosotros
 
 ```{r}
 
@@ -354,10 +451,10 @@ Análisis para description:
 
 ```{r}
 aux_d = table(length_description)
-tbl_d = tibble(L=as.numeric(names(aux_d)), Freq=as.numeric(aux_d), Rank=rank(-Freq, ties.method="first"), Log_Freq=log(Freq), Log_Rank=log(Rank))
+tbl_d = tibble(L=as.numeric(names(aux_d)), Freq=as.numeric(aux_d), Rank=rank(L), Log_Freq=log(Freq), Log_Rank=log(Rank))
 
 
-tbl_d2=tbl_d %>% filter(Rank > 10) %>% filter(Rank < 1000)
+tbl_d2=tbl_d %>% filter(Rank > 10, Rank < 1000)
 
 sol_d = lm(tbl_d2$Log_Freq ~ tbl_d2$Log_Rank)
 summary(sol_d)
@@ -366,15 +463,19 @@ summary(sol_d)
 Gráfico Zipf para descriptions:
 
 ```{r}
-plot(tbl_d2$Log_Rank, tbl_d2$Log_Freq, main="Zipf - Descriptions(Mallorca)", xlab="log(Rank)", ylab="log(Freq)", pch=19, col="darkgray")
+plot(tbl_d2$Log_Rank, tbl_d2$Log_Freq, main="Zipf - Descriptions (Mallorca)", xlab="log(Rank)", ylab="log(Freq)", pch=19, col="darkgray")
 
 abline(sol_d, col="blue", lwd=2)
 ```
 
-Para analizar si la ley de Zipf se ajusta a los datos, se ha estudiado la relacion entre la frecuencia de las longitudes de los comentarios y su rango. Segun la ley de Zipf, esta realcion tiene que ser de tipo potencial, cosa que implica una relacion lineal entre log(Freq) y log(Rank).
+Para analizar si los datos se ajustan a la ley de Zipf, se ha estudiado la relación entre la frecuencia de las longitudes de los comentarios y descripciones de los apartamentos en Mallorca y su rango. Según la ley de Zipf, esta relación debe seguir un patrón potencial, lo que implica una relación lineal entre log(Freq) y log(Rank).
 
-En ambos casos (reviews y descriptions), la regresión lineal del model $log(Freq)$ \~ $log(Rank)$ muestra un coeficiente negativo y estadísticamente significativo, con un valor de $R^2$ moderadamente elevado.
+En ambos casos (reviews y descriptions), la regresión lineal del modelo $log(Freq)$ \~ $log(Rank)$ muestra un coeficiente negativo y estadísticamente significativo, con un valor de $R^2$ moderado. Esto indica que existe una tendencia decreciente compatible con la ley de Zipf, aunque no perfecta.
 
-Gráficamente, los puntos en escala log-log se alinean aproximadamente en torno a una recta, indicando que los datos siguen un comportamiento compatible con la ley de Zipf, aunque con desviaciones en los extremos del rango, hecho habitual en datos empíricos reales.
+Gráficamente, los puntos en escala log-log se alinean aproximadamente en torno a una recta, con desviaciones visibles en los extremos del rango. Este comportamiento es habitual en datos empíricos reales, donde los valores más frecuentes o más raros tienden a desviarse del modelo teórico.
 
-En conclusión, los resultados obtenidos muestran que la distribución de longitudes tanto en los comentarios como en las descripciones de los apartamentos de Mallorca siguen un patrón compatible con la lley de Zipf, con una relación log-log significativa y una alineación gráfica clara.
+En conclusión, los resultados obtenidos muestran que la distribución de longitudes tanto en los comentarios como en las descripciones sigue un patrón aproximadamente compatible con la ley de Zipf, con una relación log-log significativa y una alineación gráfica clara, aunque con cierta dispersión.
+
+
+
+
