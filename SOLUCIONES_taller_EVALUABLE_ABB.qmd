@@ -420,6 +420,35 @@ table(cut(listings0$review_scores_rating,5),
       cut(listings0$review_scores_location,5))
 ```
 
+### SOLUCIÓN
+Generamos la tabla de contingencia para `review_scores_rating` y `review_scores_location` agrupadas en 5 categorías sin que se encuentre ninguna vacía. Para ello, se dividen los elementos únicos de cada variable en $n=5$ cuantiles, de esta forma se reduce el riesgo de que estos se repitan. Se realiza un `cut()` sobre las variables utilizando como intervalos los cuantiles obtenidos. 
+```{r}
+df <- listings0[!is.na(listings0$review_scores_rating) & !is.na(listings0$review_scores_location), ]
+scores <- df$review_scores_rating
+locations <- df$review_scores_location
+cut_qtl = function(x, n){
+  u = sort(unique(x))
+  probs = seq(0, 1, length.out = n+1)
+  q = quantile(u, probs = probs, type = 1)
+  cut(x, q, include.lowest=TRUE)
+}
+tab <- table(cut_qtl(scores, 5), cut_qtl(locations, 5))
+tab
+```
+Realizamos el test $\chi^2$
+
+```{r}
+chq = chisq.test(tab)
+chq
+```
+Se puede observar que el $p$-valor es un número muy inferior a 0.05 con lo cual se concluye que las variables son dependientes.
+
+El coeficiente de contingencia de Pearson es un valor entre 0 y 1 que calcula la asociación estadística entre dos variables cualitativas, y cuanto mayor es su valor más fuertemente están relacionadas las variables. Se calcula mediante la formula $\sqrt{\frac{\chi^2}{\chi^2+n}}$
+```{r}
+pearson <- sqrt(chq$statistic / (chq$statistic + sum(tab)))
+```
+En este caso el coeficiente de contingencia de Pearson es `r pearson` lo que indica una intensidad de asociación moderada.
+
 ## Pregunta 9 (**3 puntos**)
 
 Construye un data set con las variables review_scores_rating, review_scores_cleanliness, review_scores_location, review_scores_value de listings0 y el municipio/zona `neighbourhood_cleansed`
