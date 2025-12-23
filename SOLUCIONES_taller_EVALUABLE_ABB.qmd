@@ -151,20 +151,31 @@ Del fichero con los datos de listings `listings0` calcula los estadísticos desc
 
 Presenta los resultados con una tabla de kableExtra.
 
+### SOLUCIÓN
+
+Obtenemos los siguientes estadísticos descriptivos tanto del precio como del número de reseñas mediante la función summarise y mostramos las primeras filas de la tabla:
+
+-   Número de muestras $n$: es la cantidad de apartamentos disponibles en el municipio durante ese período.
+
+-   Media: precio medio de los apartamentos o número medio de reseñas según el municipio y el período.
+
+-   Desviación estándar: dispersión de precio o número de reseñas respecto a la media según el municipio y el período.
+
 ```{r}
 estadisticos <- listings0 %>% 
   group_by(neighbourhood_cleansed, date) %>%
-  summarise( Numero=n(),
-            mean_price = mean(price, na.rm = TRUE),
-            sd_price = sd(price, na.rm = TRUE),
-            mean_reviews = mean(number_of_reviews, na.rm = TRUE),
-            sd_reviews = sd(number_of_reviews, na.rm = TRUE)
+  summarise( 
+    Numero=n(),
+    mean_price = mean(price, na.rm = TRUE),
+    sd_price = sd(price, na.rm = TRUE),
+    mean_reviews = mean(number_of_reviews, na.rm = TRUE),
+    sd_reviews = sd(number_of_reviews, na.rm = TRUE)
   ) %>%
   ungroup()
 head(estadisticos)
 ```
 
-Presentación de los datos con una tabla de KableExtra:
+Presentación de los datos completos con una tabla de KableExtra:
 
 ```{r}
 library(kableExtra)
@@ -173,20 +184,218 @@ estadisticos %>%
   kable_styling(bootstrap_options=c("striped","hover", "condensed"), full_width=FALSE)
 ```
 
+Este análisis permite observar la evolución temporal del mercado de apartamentos turísticos ofertados en la isla.
+
+Se observan diferencias claras entre municipios en cuanto a número de apartamentos disponibles. También se aprecia un claro aumento del precio medio a medida que nos acercamos al presente. Por ejemplo, en el año 2023, en Palma, la media de precios era de 268.57€/noche, mientras que, en el año 2025, asciende a 517.49€/noche.
+
 ## Pregunta 2 (**1punto**)
 
 Consideremos las variables `price` y `number_of_reviews` de Pollença y Palma del periodo "2024-09-13", del fichero `listing_common0_select.RData`. Estudiad si estos datos se aproximan a una distribución normal gráficamente. Para ello, dibujad el histograma, la función "kernel-density" que aproxima la densidad y la densidad de la normal de media y varianza las de las muestras de las variables `price` (para precios mayores de 50 y menores de 400) y `number_of_reviews` para Palma y\
 Pollença
 
+### SOLUCIÓN
+Para el análisis gráfico se representan histogramas normalizados `hist(freq = FALSE)` de las variables consideradas. La densidad se aproxima mediante una estimación kernel usando la función `density()`, que se superpone al histograma en color rojo mediante `polygon()` para facilitar la comparación visual.
+Finalmente, en color azul, se añade la densidad de una distribución normal con media y desviación estándar iguales a las muestrales de cada conjunto de datos, con el objetivo de evaluar gráficamente el grado de aproximación a la normalidad.
+```{r}
+load("clean_data/mallorca/listing_common0_select.RData")
+df_palma = subset(listings_common0_select, date=="2024-09-13" & neighbourhood_cleansed=="Palma de Mallorca")
+df_pollenca = subset(listings_common0_select, date=="2024-09-13" & neighbourhood_cleansed=="Pollença")
+precios_palma = subset(df_palma, price>50 & price<400)[["price"]]
+precios_pollenca = subset(df_pollenca, price>50 & price<400)[["price"]]
+
+hist(precios_palma, freq=FALSE, xlab="Precio", main="Histograma de precios en Palma entre 50 y 400", breaks=20)
+polygon(density(precios_palma), col="#ff000044")
+curve(dnorm(x,mean(precios_palma),sd(precios_palma)), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+hist(df_palma[["number_of_reviews"]], freq=FALSE, main="Histograma de número de reviews en Palma", xlab="Número de reviews", breaks=20)
+polygon(density(df_palma[["number_of_reviews"]]), col="#ff000044")
+curve(dnorm(x,mean(df_palma[["number_of_reviews"]]),sd(df_palma[["number_of_reviews"]])), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+hist(precios_pollenca, freq=FALSE, xlab="Precio", main="Histograma de precios en Pollença entre 50 y 400", breaks=20)
+polygon(density(precios_pollenca), col="#ff000044")
+curve(dnorm(x,mean(precios_pollenca),sd(precios_pollenca)), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+hist(df_pollenca[["number_of_reviews"]], freq=FALSE, main="Histograma de número de reviews en Pollença", xlab="Número de reviews", breaks=20)
+polygon(density(df_pollenca[["number_of_reviews"]]), col="#ff000044")
+curve(dnorm(x,mean(df_pollenca[["number_of_reviews"]]),sd(df_pollenca[["number_of_reviews"]])), add=TRUE, col="blue")
+legend(
+  "topright",
+  legend = c("Histograma", "Densidad kernel", "Normal ajustada"),
+  col    = c("gray", "red", "blue"),
+  lwd    = c(NA, 2, 2),
+  pch    = c(15, NA, NA),
+  pt.cex = 1.5,
+  bty    = "n"
+)
+
+```
+Se puede comprobar comparando el histograma y la función de densidad con la normal que corresponde a la media y desviación estándard de cada conjunto de datos que ninguna de las graficas mostradas se asemeja a una distribución normal.
+
 ## Pregunta 3 (**1punto**)
 
 Con los datos de `listings0` de todos los periodos, contrastar si la media del precio en Alcudia es igual a la de Palma **contra** que es mayor que en Palma para los precios mayores que 50 euros y menores de 400. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste. Justifica técnicamente la conclusión del contraste.
+
+### SOLUCIÓN
+Planteamos las hipótesis:
+
+$H_{0}:~~\mu_{alcudia}=\mu_{palma}$
+
+$H_{1}:~~\mu_{alcudia}>\mu_{palma}$
+
+Se filtran los anuncios para Palma y Alcúdia con $50<precio<400$
+```{r}
+listings_palma = subset(listings0, neighbourhood_cleansed=="Palma de Mallorca" & price>50 & price<400)
+listings_alcudia = subset(listings0, neighbourhood_cleansed=="Alcúdia" & price>50 & price<400)
+mean_palma = mean(listings_palma[["price"]])
+mean_alcudia = mean(listings_alcudia[["price"]])
+```
+
+$\mu_{palma}$ = `r mean_palma`
+
+$\mu_{alcudia}$ = `r mean_alcudia`
+
+Ahora se calcula el $p$-valor para determinar si se puede rechazar o no la hipótesis nula.
+
+Estos cálculos se realizan con nivel de significación $\alpha = 0.05$
+
+```{r}
+t = t.test(x = listings_alcudia["price"], y = listings_palma["price"], alternative = "greater")
+p_valor = t$p.value
+```
+
+Al realizar los cálculos se puede observar que $p$-valor = `r sprintf("%.10f", p_valor)`
+
+Si comparamos el $p$_valor con el nivel se significación $\alpha = 0.05$ se comprueba que $`r p_valor` < 0.05$ por tanto contamos con la evidencia estadística suficientes para rechazar $H_{0}$
 
 ## Pregunta 4 (**1punto**)
 
 Con los datos de `listings0`, contrastar si las medias de los precios en Alcudia entre los periodos 2025-06-15 y 2025-09-21 son iguales contra que son menores. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste.
 
 Haced un diagrama de caja comparativo de los precios en Alcudia por periodo y coméntalo.
+
+###SOLUCION
+
+Queremos comparar los precios medios en Alcúdia entre dos períodos: 2025-06-15 y 2025-09-21.
+
+$$
+\left\{\begin{array}{ll}
+H_0: & \mu_{Jun} \geq \mu_{Sep}\\
+H_1: & \mu_{Jun} < \mu_{Sep}
+\end{array}
+\right.
+$$
+
+```{r}
+#Cargamos los dos periodos
+
+library(tidyverse)
+
+listings_0625 = read.csv("data/mallorca/2025-06-15/listings.csv.gz")
+listings_0921 = read.csv("data/mallorca/2025-09-21/listings.csv.gz")
+```
+
+```{r}
+#Filtramos Alcúdia por los dos periodos
+alcudia_0625 = listings_0625 %>%
+  filter(neighbourhood_cleansed == "Alcúdia") %>%
+  select(price) %>%
+  mutate(date = as.Date("2025-06-15"))
+
+alcudia_0921 = listings_0921 %>%
+  filter(neighbourhood_cleansed == "Alcúdia") %>%
+  select(price) %>%
+  mutate(date = as.Date("2025-09-21"))
+
+#Unimos los dos periodos en un solo dataset
+alcudia = bind_rows(alcudia_0625, alcudia_0921)
+
+alcudia$price = as.numeric(
+  gsub("[^0-9.]", "", alcudia$price)
+) #Elimina €, $, comas, espacios, es a decir, los convierte en numéricos
+
+alcudia = alcudia %>% filter(!is.na(price)) #Eliminar posibles NA
+
+table(alcudia$date)
+```
+Mirando la teoria, podemos ver que para hacer el contraste de medias, debemos utilizar el caso estadístico VIII.
+
+$$
+\left\{\begin{array}{ll}
+H_0: & \mu_1 = \mu_2\\
+H_1: & \mu_1 < \mu_2
+\end{array}
+\right.
+$$
+
+$$ T = \frac{\overline{X}_1 - \overline{X}_2}{\tilde{S}_{1,2}} \sim t_f $$
+
+```{r}
+alcudia$date = factor(
+  alcudia$date,
+  levels = as.Date(c("2025-06-15", "2025-09-21"))
+)
+
+test <- t.test(
+  price ~ date,
+  data = alcudia,
+  alternative = "less",
+  conf.level = 0.95
+)
+
+test
+```
+
+Para comparar las medias de los precios en Alcúdia entre los periodos 2025-06-15 y 2025-09-21, se ha utilizado un contraste t Student para dos muestras independientes con varianzas desconocidas y no necesariamente iguales (caso VIII).
+
+A partir del contraste se obtiene un $p$-valor muy superior al 0.05, por lo que no hay evidencia estadística para rechazar la hipótesis nula. No podemos afirmar que los precios medios de los alojamientos en Alcúdia en el periodo 2025-06-15 sean menores que los del periodo 2025-09-21.
+
+El intervalo de confianza al 95% para la diferencia de medias ($\mu_{Jun}$ - $\mu_{Sep}$) incluye valores positivos y negativos, por lo que no permite concluir que exista una diferencia significativa entre ambos periodos.
+
+
+Finalmente, hacemos un diagrama de caja comparativo:
+
+```{r}
+boxplot(
+  price~date,
+  data=alcudia,
+  main="Precio en Alcúdia por periodo",
+  xlab="Periodo",
+  ylab="Precio",
+  col=c("lightblue", "lightgreen")
+)
+```
+
+El diagrama de caja muestra que los precios en el periodo 2025-09-21 tienden a ser más elevados que en el periodo 2025-06-15, con una mayor dispersión y presencia de valores extremos. Se observa un desplazamiento general de la distribución hacia valores más altos en septiembre, lo cual es coherente con el aumento de la demanda turística en temporada alta. Sin embargo, esta diferencia visual no es estadísticamente significativa según el contraste realizado.
+
+En conclusión, el contraste de medias entre los precios de Alcúdia en junio y en septiembre nos muestra un $p$-valor de 0.65007, muy superior al umbral de significación. Por lo tanto, no podemos afirmar que los precios de junio sean significativamente más bajos que los de septiembre. El boxplot nos muestra una media ligeramente superior en septiembre, pero las diferencias no son estadísticamente significativas.
+
 
 ## Pregunta 5 (**1 punto**)
 
@@ -439,6 +648,35 @@ table(cut(listings0$review_scores_rating,5),
       cut(listings0$review_scores_location,5))
 ```
 
+### SOLUCIÓN
+Generamos la tabla de contingencia para `review_scores_rating` y `review_scores_location` agrupadas en 5 categorías sin que se encuentre ninguna vacía. Para ello, se dividen los elementos únicos de cada variable en $n=5$ cuantiles, de esta forma se reduce el riesgo de que estos se repitan. Se realiza un `cut()` sobre las variables utilizando como intervalos los cuantiles obtenidos. 
+```{r}
+df <- listings0[!is.na(listings0$review_scores_rating) & !is.na(listings0$review_scores_location), ]
+scores <- df$review_scores_rating
+locations <- df$review_scores_location
+cut_qtl = function(x, n){
+  u = sort(unique(x))
+  probs = seq(0, 1, length.out = n+1)
+  q = quantile(u, probs = probs, type = 1)
+  cut(x, q, include.lowest=TRUE)
+}
+tab <- table(cut_qtl(scores, 5), cut_qtl(locations, 5))
+tab
+```
+Realizamos el test $\chi^2$
+
+```{r}
+chq = chisq.test(tab)
+chq
+```
+Se puede observar que el $p$-valor es un número muy inferior a 0.05 con lo cual se concluye que las variables son dependientes.
+
+El coeficiente de contingencia de Pearson es un valor entre 0 y 1 que calcula la asociación estadística entre dos variables cualitativas, y cuanto mayor es su valor más fuertemente están relacionadas las variables. Se calcula mediante la formula $\sqrt{\frac{\chi^2}{\chi^2+n}}$
+```{r}
+pearson <- sqrt(chq$statistic / (chq$statistic + sum(tab)))
+```
+En este caso el coeficiente de contingencia de Pearson es `r pearson` lo que indica una intensidad de asociación moderada.
+
 ## Pregunta 9 (**3 puntos**)
 
 Construye un data set con las variables review_scores_rating, review_scores_cleanliness, review_scores_location, review_scores_value de listings0 y el municipio/zona `neighbourhood_cleansed`
@@ -446,6 +684,71 @@ Construye un data set con las variables review_scores_rating, review_scores_clea
 Calcula la matriz de correlaciones entre estas variables y haz un gráfico de pares de variables que muestre las correlaciones ([ggpairs](https://r-charts.com/correlation/ggpairs/)) con la librería GGally. Comenta los resultados.
 
 Haz un `matrixplot` de las correlaciones con la librería `corrplot`. Comenta los resultados.
+
+### SOLUCIÓN
+
+Construimos el data set con las variables indicadas y mostramos las primeras filas, poniendo el municipio en la primera columna para mejor visualización:
+
+```{r}
+datos_scores <- listings0 %>%
+  select( 
+    neighbourhood_cleansed,
+    review_scores_rating,
+    review_scores_cleanliness,
+    review_scores_location,
+    review_scores_value
+  )
+head(datos_scores)
+```
+
+Calculamos la matriz de correlaciones de las variables numéricas (puntuaciones del 0 al 5) y generamos el gráfico de pares de variables con la librería GGally:
+
+```{r}
+# Calculamos la matriz
+variables_numericas <- datos_scores %>%
+  select(
+    review_scores_rating,
+    review_scores_cleanliness,
+    review_scores_location,
+    review_scores_value
+  )
+matriz_correlaciones <- cor(variables_numericas, use = "pairwise.complete.obs")
+
+# Generamos el gráfico
+library(GGally)
+ggpairs(variables_numericas,
+        title = "Gráfico de pares de puntuaciones de los apartamentos")
+```
+
+En la diagonal del gráfico se observan las distribuciones individuales (densidad) de cada variable. En el triángulo superior, se pueden observar los coeficientes de correlación cuya significancia se indica con los asteriscos (\*\*\*) de la misma forma que al calcular el p-valor con un test. En el triángulo inferior, se tienen los gráficos de dispersión entre pares de variables.
+
+De los coeficientes de correlación se puede decir que la localización de los apartamentos es la que menos influye en la puntuación global (rating), siendo la calidad (value) la más influyente de las analizadas. También se puede ver la relación entre una buena puntuación en limpieza (cleanliness) y una buena puntuación en calidad, que sugiere que la percepción de la calidad de un apartamento limpio es mucho mayor que la de un apartamento con más suciedad. Las dos variables de puntuación con menos relación entre sí son la limpieza y la localización, cuya independencia es lógica, puesto que no influyen mucho la una en la otra.
+
+Estas relaciones pueden observarse en los gráficos de dispersión de forma visual. La relación fuerte entre la puntuación global, la limpieza y la calidad es representada mediante una nube centrada en la diagonal, lo que sugiere que las puntuaciones en las tres categorías indicadas son similares entre sí, siendo la calidad la diagonal más visible y, por tanto, la más influyente. En cambio, el gráfico que relaciona la puntuación global con la localización es más disperso, lo que sugiere una menor relación entre ambas. De hecho, los gráficos que relacionan la localización son los menos lineales, lo que refuerza la afirmación anterior: es la variable menos influyente.
+
+Por lo tanto, se puede concluir que la puntuación global se ve muy influida por la limpieza y la calidad del apartamento y no tanto por la localización, cuyo valor no puede mejorarse de la misma forma que la limpieza y la calidad sí pueden. Todas las correlaciones son positivas y significativas, por lo que se puede deducir que los huéspedes tienden a puntuar las cuatro categorías de forma similar.
+
+Generamos un `matrixplot` de las correlaciones:
+
+```{r}
+library(corrplot)
+corrplot(
+  matriz_correlaciones,
+  method = "color",
+  type = "upper",
+  addCoef.col = "black",
+  tl.col = "black",
+  tl.srt = 45,
+  title = "Matriz de correlaciones de puntuaciones",
+  mar = c(0,0,2,0)
+)
+```
+
+Los valores en colores azules más oscuros indican una mayor correlación entre un par de variables, siendo la puntuación en una escala del -1 al 1, ambos inclusive.
+
+Este gráfico refuerza las afirmaciones realizadas anteriormente, recalcando la fuerte relación entre la puntuación global, la limpieza y la calidad de un apartamento y la menor influencia de la puntuación de la localización en todas las demás variables.
+
+En conclusión, la limpieza influye en la calidad y ambas influyen en la puntuación global, siendo la localización la menos influyente de las cuatro. Por lo tanto, los anfitriones podrían mejorar significativamente su puntuación global mejorando, si fuera posible, la limpieza y la calidad de los apartamentos.
 
 ## Pregunta 10 (**2 puntos**)
 
@@ -465,7 +768,7 @@ length_description=stringr::str_count(listings0$description,"\\w+")
 barplot(table(length_description))
 ```
 
-Y ahora se calculan los rango os lo dejo para reviews par desctption lo haceís vosotros
+Y ahora se calculan los rango os lo dejo para reviews para description lo haceís vosotros
 
 ```{r}
 
@@ -488,3 +791,45 @@ summary(sol2)
 sol3=lm(tbl2$Log_Freq~tbl2$Log_Rank)
 summary(sol3)
 ```
+
+### SOLUCIÓN
+
+Gráfico Zipf(log-log) para las reviews:
+
+```{r}
+plot(tbl2$Log_Rank, tbl2$Log_Freq, main = "Zipf - Reviews (Mallorca)", xlab = "log(Rank)", ylab = "log(Freq)", pch = 19, col = "darkgray")
+abline(sol3, col = "red", lwd = 2)
+```
+
+Análisis para description:
+
+```{r}
+aux_d = table(length_description)
+tbl_d = tibble(L=as.numeric(names(aux_d)), Freq=as.numeric(aux_d), Rank=rank(L), Log_Freq=log(Freq), Log_Rank=log(Rank))
+
+
+tbl_d2=tbl_d %>% filter(Rank > 10, Rank < 1000)
+
+sol_d = lm(tbl_d2$Log_Freq ~ tbl_d2$Log_Rank)
+summary(sol_d)
+```
+
+Gráfico Zipf para descriptions:
+
+```{r}
+plot(tbl_d2$Log_Rank, tbl_d2$Log_Freq, main="Zipf - Descriptions (Mallorca)", xlab="log(Rank)", ylab="log(Freq)", pch=19, col="darkgray")
+
+abline(sol_d, col="blue", lwd=2)
+```
+
+Para analizar si los datos se ajustan a la ley de Zipf, se ha estudiado la relación entre la frecuencia de las longitudes de los comentarios y descripciones de los apartamentos en Mallorca y su rango. Según la ley de Zipf, esta relación debe seguir un patrón potencial, lo que implica una relación lineal entre log(Freq) y log(Rank).
+
+En ambos casos (reviews y descriptions), la regresión lineal del modelo $log(Freq)$ \~ $log(Rank)$ muestra un coeficiente negativo y estadísticamente significativo, con un valor de $R^2$ moderado. Esto indica que existe una tendencia decreciente compatible con la ley de Zipf, aunque no perfecta.
+
+Gráficamente, los puntos en escala log-log se alinean aproximadamente en torno a una recta, con desviaciones visibles en los extremos del rango. Este comportamiento es habitual en datos empíricos reales, donde los valores más frecuentes o más raros tienden a desviarse del modelo teórico.
+
+En conclusión, los resultados obtenidos muestran que la distribución de longitudes tanto en los comentarios como en las descripciones sigue un patrón aproximadamente compatible con la ley de Zipf, con una relación log-log significativa y una alineación gráfica clara, aunque con cierta dispersión.
+
+
+
+
