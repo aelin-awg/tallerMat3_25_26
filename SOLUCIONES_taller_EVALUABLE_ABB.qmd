@@ -1,6 +1,6 @@
 ---
-title: "ENUNCIADO taller en grupo Mat3 GIN 2025-2026"
-author: "Taller"
+title: "SOLUCIONES taller en grupo Mat3 GIN 2025-2026"
+author: "Michael Arias, Ana Gener, Laia Lluch, Arión Sintes"
 lang: es
 format:
   html:
@@ -13,6 +13,7 @@ format:
     collapse: true
     keep-md: true
     code-overflow: wrap
+    self-contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -194,8 +195,9 @@ Consideremos las variables `price` y `number_of_reviews` de Pollença y Palma de
 Pollença
 
 ### SOLUCIÓN
-Para el análisis gráfico se representan histogramas normalizados `hist(freq = FALSE)` de las variables consideradas. La densidad se aproxima mediante una estimación kernel usando la función `density()`, que se superpone al histograma en color rojo mediante `polygon()` para facilitar la comparación visual.
-Finalmente, en color azul, se añade la densidad de una distribución normal con media y desviación estándar iguales a las muestrales de cada conjunto de datos, con el objetivo de evaluar gráficamente el grado de aproximación a la normalidad.
+
+Para el análisis gráfico se representan histogramas normalizados `hist(freq = FALSE)` de las variables consideradas. La densidad se aproxima mediante una estimación kernel usando la función `density()`, que se superpone al histograma en color rojo mediante `polygon()` para facilitar la comparación visual. Finalmente, en color azul, se añade la densidad de una distribución normal con media y desviación estándar iguales a las muestrales de cada conjunto de datos, con el objetivo de evaluar gráficamente el grado de aproximación a la normalidad.
+
 ```{r}
 load("clean_data/mallorca/listing_common0_select.RData")
 df_palma = subset(listings_common0_select, date=="2024-09-13" & neighbourhood_cleansed=="Palma de Mallorca")
@@ -256,6 +258,7 @@ legend(
 )
 
 ```
+
 Se puede comprobar comparando el histograma y la función de densidad con la normal que corresponde a la media y desviación estándard de cada conjunto de datos que ninguna de las graficas mostradas se asemeja a una distribución normal.
 
 ## Pregunta 3 (**1punto**)
@@ -263,6 +266,7 @@ Se puede comprobar comparando el histograma y la función de densidad con la nor
 Con los datos de `listings0` de todos los periodos, contrastar si la media del precio en Alcudia es igual a la de Palma **contra** que es mayor que en Palma para los precios mayores que 50 euros y menores de 400. Construid la hipótesis nula y alternativa, calculad el $p$-valor y el intervalo de confianza asociado al contraste. Justifica técnicamente la conclusión del contraste.
 
 ### SOLUCIÓN
+
 Planteamos las hipótesis:
 
 $H_{0}:~~\mu_{alcudia}=\mu_{palma}$
@@ -270,6 +274,7 @@ $H_{0}:~~\mu_{alcudia}=\mu_{palma}$
 $H_{1}:~~\mu_{alcudia}>\mu_{palma}$
 
 Se filtran los anuncios para Palma y Alcúdia con $50<precio<400$
+
 ```{r}
 listings_palma = subset(listings0, neighbourhood_cleansed=="Palma de Mallorca" & price>50 & price<400)
 listings_alcudia = subset(listings0, neighbourhood_cleansed=="Alcúdia" & price>50 & price<400)
@@ -292,7 +297,7 @@ p_valor = t$p.value
 
 Al realizar los cálculos se puede observar que $p$-valor = `r sprintf("%.10f", p_valor)`
 
-Si comparamos el $p$_valor con el nivel se significación $\alpha = 0.05$ se comprueba que $`r p_valor` < 0.05$ por tanto contamos con la evidencia estadística suficientes para rechazar $H_{0}$
+Si comparamos el $p$\_valor con el nivel se significación $\alpha = 0.05$ se comprueba que $`r p_valor` < 0.05$ por tanto contamos con la evidencia estadística suficientes para rechazar $H_{0}$
 
 ## Pregunta 4 (**1punto**)
 
@@ -300,7 +305,7 @@ Con los datos de `listings0`, contrastar si las medias de los precios en Alcudia
 
 Haced un diagrama de caja comparativo de los precios en Alcudia por periodo y coméntalo.
 
-###SOLUCION
+### SOLUCIÓN
 
 Queremos comparar los precios medios en Alcúdia entre dos períodos: 2025-06-15 y 2025-09-21.
 
@@ -344,6 +349,7 @@ alcudia = alcudia %>% filter(!is.na(price)) #Eliminar posibles NA
 
 table(alcudia$date)
 ```
+
 Mirando la teoria, podemos ver que para hacer el contraste de medias, debemos utilizar el caso estadístico VIII.
 
 $$
@@ -378,7 +384,6 @@ A partir del contraste se obtiene un $p$-valor muy superior al 0.05, por lo que 
 
 El intervalo de confianza al 95% para la diferencia de medias ($\mu_{Jun}$ - $\mu_{Sep}$) incluye valores positivos y negativos, por lo que no permite concluir que exista una diferencia significativa entre ambos periodos.
 
-
 Finalmente, hacemos un diagrama de caja comparativo:
 
 ```{r}
@@ -396,12 +401,11 @@ El diagrama de caja muestra que los precios en el periodo 2025-09-21 tienden a s
 
 En conclusión, el contraste de medias entre los precios de Alcúdia en junio y en septiembre nos muestra un $p$-valor de 0.65007, muy superior al umbral de significación. Por lo tanto, no podemos afirmar que los precios de junio sean significativamente más bajos que los de septiembre. El boxplot nos muestra una media ligeramente superior en septiembre, pero las diferencias no son estadísticamente significativas.
 
-
 ## Pregunta 5 (**1 punto**)
 
 Comparar con un bopxlot de las valoraciones medias `review_scores_rating` para Alcudia, Palma, Calvià y Pollença. Hacer el gráfico con ggplot2 y todo lujo de destalles.
 
-### Solución
+### SOLUCIÓN
 
 Hemos de comparar la distribucion de las valoraciones medias entre nuestros cuatro municpios dados. Al usar el boxplot como nos dice el enunciado, podremos visualizar medianas, dispersion, asimetrias y posibles "outliers" (casos que no se ajustan a lo esperado) de cada grupo. Para comenzar, hemos de quedarnos solo con los municipios de nos interesan de nuestro set de datos. Para esto, aplicamos las funciones de filter(), que seleccionara las filas segun una condición, y %\>% que sirve para encadenar operaciones de una forma mas legible.
 
@@ -437,7 +441,7 @@ Dentro de nuestro grafico, cada Municipio vendra representado por un boxplot de 
 
 Calcular la proporción de apartamentos de la muestra "2025-09-21" con media de valoración `review_scores_rating` mayor que 4 en Alcudia y en Calvià son iguales contra que son distintas. Construid un intervalo de confianza para la diferencia de proporciones.
 
-### Solución
+### SOLUCIÓN
 
 Para comprobar si las proporciones de apartamentos de valoracion mayor que 4 entre Alcúdia y Calvià son iguales, comenzamos declarando que $p_1$ representara la proporcion en Alcúdia, mientras que $p_2$ la proporcion en Calvià, ya que nos interesa su diferencia: $\hat p_1 - \hat p_2$. Declarandolo como un contraste de dos proporciones, obtenemos la siguiente hipotesis nula y alternativa: $H_0 : p_1 = p_2$ $H_1 : p_1 \ne p_2$ Establecienco nuestro nivel de significacion $\alpha = 0.05$. Si el p-valor $\geq$ 0.05, no rechazamos $H_0$, que se puede ver tambien a la hora de hacer el intervalo de confianza por si apareze el 0 o no. Comenzamos filtrando nuestros datos por fecha y municipios:
 
@@ -504,7 +508,7 @@ Nuestro intervalo de confianza para nuestra diferencia es \[-0.02712, 0.04813\].
 
 Calcular la proporción de apartamentos de los periodos 2025-06-15 y 2025-09-21 con media de valoración `review_scores_rating` mayor que 4 en Palma y en Pollença son iguales contra que son distintas.
 
-### Solución
+### SOLUCIÓN
 
 **Calculos para el periodo 2025-06-15**
 
@@ -649,7 +653,9 @@ table(cut(listings0$review_scores_rating,5),
 ```
 
 ### SOLUCIÓN
-Generamos la tabla de contingencia para `review_scores_rating` y `review_scores_location` agrupadas en 5 categorías sin que se encuentre ninguna vacía. Para ello, se dividen los elementos únicos de cada variable en $n=5$ cuantiles, de esta forma se reduce el riesgo de que estos se repitan. Se realiza un `cut()` sobre las variables utilizando como intervalos los cuantiles obtenidos. 
+
+Generamos la tabla de contingencia para `review_scores_rating` y `review_scores_location` agrupadas en 5 categorías sin que se encuentre ninguna vacía. Para ello, se dividen los elementos únicos de cada variable en $n=5$ cuantiles, de esta forma se reduce el riesgo de que estos se repitan. Se realiza un `cut()` sobre las variables utilizando como intervalos los cuantiles obtenidos.
+
 ```{r}
 df <- listings0[!is.na(listings0$review_scores_rating) & !is.na(listings0$review_scores_location), ]
 scores <- df$review_scores_rating
@@ -663,18 +669,22 @@ cut_qtl = function(x, n){
 tab <- table(cut_qtl(scores, 5), cut_qtl(locations, 5))
 tab
 ```
+
 Realizamos el test $\chi^2$
 
 ```{r}
 chq = chisq.test(tab)
 chq
 ```
+
 Se puede observar que el $p$-valor es un número muy inferior a 0.05 con lo cual se concluye que las variables son dependientes.
 
 El coeficiente de contingencia de Pearson es un valor entre 0 y 1 que calcula la asociación estadística entre dos variables cualitativas, y cuanto mayor es su valor más fuertemente están relacionadas las variables. Se calcula mediante la formula $\sqrt{\frac{\chi^2}{\chi^2+n}}$
+
 ```{r}
 pearson <- sqrt(chq$statistic / (chq$statistic + sum(tab)))
 ```
+
 En este caso el coeficiente de contingencia de Pearson es `r pearson` lo que indica una intensidad de asociación moderada.
 
 ## Pregunta 9 (**3 puntos**)
@@ -829,7 +839,3 @@ En ambos casos (reviews y descriptions), la regresión lineal del modelo $log(Fr
 Gráficamente, los puntos en escala log-log se alinean aproximadamente en torno a una recta, con desviaciones visibles en los extremos del rango. Este comportamiento es habitual en datos empíricos reales, donde los valores más frecuentes o más raros tienden a desviarse del modelo teórico.
 
 En conclusión, los resultados obtenidos muestran que la distribución de longitudes tanto en los comentarios como en las descripciones sigue un patrón aproximadamente compatible con la ley de Zipf, con una relación log-log significativa y una alineación gráfica clara, aunque con cierta dispersión.
-
-
-
-
