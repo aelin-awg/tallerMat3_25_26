@@ -401,13 +401,241 @@ En conclusión, el contraste de medias entre los precios de Alcúdia en junio y 
 
 Comparar con un bopxlot de las valoraciones medias `review_scores_rating` para Alcudia, Palma, Calvià y Pollença. Hacer el gráfico con ggplot2 y todo lujo de destalles.
 
+### Solución
+
+Hemos de comparar la distribucion de las valoraciones medias entre nuestros cuatro municpios dados. Al usar el boxplot como nos dice el enunciado, podremos visualizar medianas, dispersion, asimetrias y posibles "outliers" (casos que no se ajustan a lo esperado) de cada grupo. Para comenzar, hemos de quedarnos solo con los municipios de nos interesan de nuestro set de datos. Para esto, aplicamos las funciones de filter(), que seleccionara las filas segun una condición, y %\>% que sirve para encadenar operaciones de una forma mas legible.
+
+```{r}
+municipios = c("Alcúdia", "Palma de Mallorca", "Calvià", "Pollença")
+listings5 = listings0 %>% filter(neighbourhood_cleansed %in% municipios)
+```
+
+De forma resumida, acabamos de filtar un conjunto de datos quedandonos solo con las observaciones que pertenecen a un conjunto de categorias concretas.
+
+A continuacion, construimos el grafico haciendo uso de ggplot2.
+
+```{r}
+ggplot(listings5, 
+       aes(x = neighbourhood_cleansed, y = review_scores_rating,fill = neighbourhood_cleansed))+
+  geom_boxplot(alpha = 0.7, outlier.color = "black") + 
+  labs(title = "Valoraciones medias por municipio", x = "Municipio", y = "Valoracion media (review_scores_rating)", fill = "Municipio") + 
+  theme_minimal(base_size = 14) + 
+  theme(legend.position = "none", plot.title = element_text(face = "bold"))
+```
+
+En cuanto a funciones usadas para la creacion del grafico: - aes: srive para definir que variable corresponde con el eje de coordenadas X e Y al igual que determinar el color de esta. Es una funcion estetica.
+
+-   geom_boxplot: Seleccionamos la forma de representacion de nuestras distribuciones.
+
+-   labs, theme_minimal, theme: Sirven para añadir cosas como etiquetas y titulos, colores... En general, cada una de estas funciones sirven para añadir funciones o elementos visuales o esteticos. Al usar boxplot como nos pide el enunciado, se nos hace mas facil la comparacion por cosas como la muestra mediana, permitiendo una comparacion mas directa, la comparacion de multiples distribuciones a la vez y la señalizacion de los outliers.
+
+**Interpretación del gráfico y Comparación entre municipios.**
+
+Dentro de nuestro grafico, cada Municipio vendra representado por un boxplot de un color distinto cada uno. Dentro de este grafico, la lina horizontal dentro de la caja es la mediana, el valor central. La caja abarca de nuestro primer cuartil hasta el tercero, que representa el 50% central de los datos. Los bigotes, que son las barras verticales de la figura, sirven para indicar los valores que no se consideran outliers, mientras que los puntos negros fuera de estos son los outliers, con valoraciones inusualmente bajas o altas. Alcúdia presenta una mediana alta, que ronda el 4.8. Como su caja es estrecha, esto nos indica que hay una variabilidad baja. Hay una gran cantidad de outliers, la mayoria de los cuales suelen rondar puntuacions altas, pero hay un subconjunto de ellos que ronda las bajas. En cuanto a Calviá, su mediana ronda los 4.8 o 4.85, pero se diferencia de Alcúdia con una caja mas ancha, indicando una variabilidad mas alta. En cuanto a los Outliers, Calviá presenta pocos, y ademas rondan puntuaciones altas iguales o superiores al 3. Despues se tiene a Palma de Mallorca, la cual presenta una mediana similar a la de Calviá, pero con una caja mas estrecha indicando poca variabilidad, es decir, la mayoria de valoraciones suelen rondar una media de 4.8 o 4.85. Aunque tenga mas outliers, estos estan en una situacion casi identica a los de Calviá, donde rondan puntuaciones altas iguales o superiores al 3. Por ultimo, Pollença presenta una mediana similar a la de Alcúdia, pero con una caja mas ancha indicando mas variabilidad. No solo eso, sino que sus outliers estan dispersos por todo el eje Y, con valoraciones que llegan hasta el 1. En conclusion, Palma de Mallorca presenta la mediana mas alta y una disspersion relativamente baja, lo que suigere valoraciones mas consistentemente altas que las otras, pero por muy poco ya que Calviá esta en una situación similar. En tercer lugar estaria Alcúdia y por ultimo Pollença, debido a su mayor variabilidad y algunos valores extremadamente bajos.
+
 ## Pregunta 6 (**1 punto**)
 
 Calcular la proporción de apartamentos de la muestra "2025-09-21" con media de valoración `review_scores_rating` mayor que 4 en Alcudia y en Calvià son iguales contra que son distintas. Construid un intervalo de confianza para la diferencia de proporciones.
 
+### Solución
+
+Para comprobar si las proporciones de apartamentos de valoracion mayor que 4 entre Alcúdia y Calvià son iguales, comenzamos declarando que $p_1$ representara la proporcion en Alcúdia, mientras que $p_2$ la proporcion en Calvià, ya que nos interesa su diferencia: $\hat p_1 - \hat p_2$. Declarandolo como un contraste de dos proporciones, obtenemos la siguiente hipotesis nula y alternativa: $H_0 : p_1 = p_2$ $H_1 : p_1 \ne p_2$ Establecienco nuestro nivel de significacion $\alpha = 0.05$. Si el p-valor $\geq$ 0.05, no rechazamos $H_0$, que se puede ver tambien a la hora de hacer el intervalo de confianza por si apareze el 0 o no. Comenzamos filtrando nuestros datos por fecha y municipios:
+
+```{r}
+listings6 = listings0 %>% filter(
+  date==as.Date("2025-09-21"),
+  neighbourhood_cleansed %in% c("Alcúdia", "Calvià")
+)
+```
+
+Y despues guardamos nuestras porporciones cogiendo los datos de la coleccion anteriormente creada:
+
+```{r}
+props = listings6 %>%
+  filter(!is.na(review_scores_rating)) %>%   # quitar NA
+  group_by(neighbourhood_cleansed) %>%
+  summarise(
+    n = n(),                                      # n1 y n2
+    x = sum(review_scores_rating > 4),            # x1 y x2
+    p = mean(review_scores_rating > 4),           # p1 y p2
+  )
+```
+
+x = Numero de apartamentos con rating \> 4 n = numero total de apartamentos $\hat p$ = propocion $x/n$ Ahora, guardamos cada valor calculado en su respectivo lugar haciendo uso de filtros.
+
+```{r}
+# Alcúdia
+n1 = props$n[props$neighbourhood_cleansed == "Alcúdia"]
+x1 = props$x[props$neighbourhood_cleansed == "Alcúdia"]
+p1 = props$p[props$neighbourhood_cleansed == "Alcúdia"]
+
+# Calvià
+n2 = props$n[props$neighbourhood_cleansed == "Calvià"]
+x2 = props$x[props$neighbourhood_cleansed == "Calvià"]
+p2 = props$p[props$neighbourhood_cleansed == "Calvià"]
+
+```
+
+Con estos datos, somos capazes de ver que nos encontramos en el caso XIX debido a la independencia de las proporciones. Por lo que procedemos a calcular el siguiente estadistico" $\displaystyle Z=\frac{\hat p_1 - \hat p_2}{\sqrt{\hat p\hat q(\frac{1}{n_1}+\frac{1}{n_2})}}$ donde $\displaystyle \hat p = \frac{n_1\hat p_1 + n_2\hat p_2}{n_1+n_2}$ y $\hat q = 1- \hat p$.
+
+```{r}
+p = ((p1*n1)+(n2*p2))/(n1+n2)
+q = 1-p
+Z = (p1-p2)/sqrt(p*q*((1/n1)+(1/n2)))
+```
+
+Y, con lo cual, somos capaces de calcular el p-valor haciendo uso de: $\displaystyle 2·P(Z\geq |z|)$
+
+```{r}
+2*pnorm(Z, lower.tail = FALSE)
+```
+
+Nuestro p-valor (0.58436), nos sale superior al $\alpha = 0.05$ establecido anteriormente, por lo que no encontramos evidencia estadisticamente significativa de que las proporciones sean distintas, es decir, no rechazamos $H_0$. Por lo que acabamos viendo que las proporciones son iguales.
+
+El intervalo de confianza para el caso XIX es $\displaystyle ]\hat p_1 - \hat p_2-z_{0.975}·\sqrt{\hat p \hat q (\frac{1}{n_1}+\frac{1}{n_2})},\hat p_1 -\hat p_2 + z_{0.975}\sqrt{\hat p \hat q (\frac{1}{n_1}+\frac{1}{n_2})}[$. Este lo podemos calcular de la siguiente forma:
+
+```{r}
+c(p1-p2-qnorm(0.975)*sqrt(p*q*(1/n1+1/n2)),p1-p2+qnorm(0.975)*sqrt(p*q*(1/n1+1/n2))) #0.975 sale de hacer 1-(alpha=0.05/2)
+```
+
+Nuestro intervalo de confianza para nuestra diferencia es \[-0.02712, 0.04813\]. Como podemos ver, el 0 acaba estando incluido en este intervalo, con lo que podemos corroborar que no podemos descartar que las dos proporciones sean iguales, ya que no hay pruebas de una diferencia significativa. Por lo que, en conclusion, no encontramos pruebas estadisticamente significativas de que la proporcion de apartamentos con `review_scores_rating > 4` difiera entre Alcúdia y Calvià en la muestra de la fecha 21-09-2025.
+
 ## Pregunta 7 (**1punto**)
 
 Calcular la proporción de apartamentos de los periodos 2025-06-15 y 2025-09-21 con media de valoración `review_scores_rating` mayor que 4 en Palma y en Pollença son iguales contra que son distintas.
+
+### Solución
+
+**Calculos para el periodo 2025-06-15**
+
+Para comprobar si las proporciones de apartamentos de valoracion mayor que 4 del periodo 2025-06-15 entre Palma de Mallorca y Pollença son iguales, comenzamos declarando que $p_1$ representara la proporcion en Palma de Mallorca, mientras que $p_2$ la proporcion en Pollença, ya que nos interesa su diferencia: $\hat p_1 - \hat p_2$. Declarandolo como un contraste de dos proporciones, obtenemos la siguiente hipotesis nula y alternativa: $H_0 : p_1 = p_2$ $H_1 : p_1 \ne p_2$ Establecienco nuestro nivel de significacion $\alpha = 0.05$. Si el p-valor $\geq$ 0.05, no rechazamos $H_0$, que se puede ver tambien a la hora de hacer el intervalo de confianza por si apareze el 0 o no dentro del intervalo. Comenzamos filtrando nuestros datos por fecha y municipios:
+
+```{r}
+listings7 = listings0 %>% filter(
+  date==as.Date("2025-06-15"),
+  neighbourhood_cleansed %in% c("Palma de Mallorca", "Pollença")
+)
+```
+
+Y despues guardamos nuestras porporciones cogiendo los datos de la coleccion anteriormente creada:
+
+```{r}
+props = listings7 %>%
+  filter(!is.na(review_scores_rating)) %>%   # quitar NA
+  group_by(neighbourhood_cleansed) %>%
+  summarise(
+    n = n(),                                      # n1 y n2
+    x = sum(review_scores_rating > 4),            # x1 y x2
+    p = mean(review_scores_rating > 4),           # p1 y p2
+  )
+```
+
+x = Numero de apartamentos con rating \> 4 n = numero total de apartamentos $\hat p$ = propocion $x/n$ Ahora, guardamos cada valor calculado en su respectivo lugar haciendo uso de filtros.
+
+```{r}
+# Palma de Mallorca
+n1 = props$n[props$neighbourhood_cleansed == "Palma de Mallorca"]
+x1 = props$x[props$neighbourhood_cleansed == "Palma de Mallorca"]
+p1 = props$p[props$neighbourhood_cleansed == "Palma de Mallorca"]
+
+# Pollença
+n2 = props$n[props$neighbourhood_cleansed == "Pollença"]
+x2 = props$x[props$neighbourhood_cleansed == "Pollença"]
+p2 = props$p[props$neighbourhood_cleansed == "Pollença"]
+
+```
+
+Con estos datos, somos capazes de ver que nos encontramos en el caso XIX debido a la independencia de las proporciones. Por lo que procedemos a calcular el siguiente estadistico" $\displaystyle Z=\frac{\hat p_1 - \hat p_2}{\sqrt{\hat p\hat q(\frac{1}{n_1}+\frac{1}{n_2})}}$ donde $\displaystyle \hat p = \frac{n_1\hat p_1 + n_2\hat p_2}{n_1+n_2}$ y $\hat q = 1- \hat p$.
+
+```{r}
+p = ((p1*n1)+(n2*p2))/(n1+n2)
+q = 1-p
+Z = (p1-p2)/sqrt(p*q*((1/n1)+(1/n2)))
+```
+
+Y, con lo cual, somos capaces de calcular el p-valor haciendo uso de: $\displaystyle 2·P(Z\geq |z|)$
+
+```{r}
+2*pnorm(Z, lower.tail = FALSE)
+```
+
+Nuestro p-valor (1.77824e\^-06), nos sale inferior al $\alpha = 0.05$ establecido anteriormente, por lo que rechazamos nuestra hipotesis nula, aceptando la alternativa, y por lo tanto podemos decir que las proporciones entre Palma de Mallorca y Pollença son diferentes para el periodo de tiempo de 2025-06-15. Para la comparacion final entre ambos, calcularemos el intervalo de confianza del 95% usando la formula del caso XIX: $\displaystyle ]\hat p_1 - \hat p_2-z_{0.975}·\sqrt{\hat p \hat q (\frac{1}{n_1}+\frac{1}{n_2})},\hat p_1 \hat p_2 + z_{0.975}\sqrt{\hat p -\hat q (\frac{1}{n_1}+\frac{1}{n_2})}[$.
+
+```{r}
+interval1 = c(p1-p2-qnorm(0.975)*sqrt(p*q*(1/n1+1/n2)),p1-p2+qnorm(0.975)*sqrt(p*q*(1/n1+1/n2))) #0.975 sale de hacer 1-(alpha=0.05/2)
+```
+
+**Calculos para el periodo 2025-09-21**
+
+Para comprobar si las proporciones de apartamentos de valoracion mayor que 4 del periodo 2025-09-21 entre Palma de Mallorca y Pollença son iguales, comenzamos declarando que $p_1$ representara la proporcion en Palma de Mallorca, mientras que $p_2$ la proporcion en Pollença, ya que nos interesa su diferencia: $\hat p_1 - \hat p_2$. Declarandolo como un contraste de dos proporciones, obtenemos la siguiente hipotesis nula y alternativa: $H_0 : p_1 = p_2$ $H_1 : p_1 \ne p_2$ Establecienco nuestro nivel de significacion $\alpha = 0.05$. Si el p-valor $\geq$ 0.05, no rechazamos $H_0$, que se puede ver tambien a la hora de hacer el intervalo de confianza por si apareze el 0 o no dentro del intervalo. Comenzamos filtrando nuestros datos por fecha y municipios:
+
+```{r}
+listings7 = listings0 %>% filter(
+  date==as.Date("2025-09-21"),
+  neighbourhood_cleansed %in% c("Palma de Mallorca", "Pollença")
+)
+```
+
+Y despues guardamos nuestras porporciones cogiendo los datos de la coleccion anteriormente creada:
+
+```{r}
+props = listings7 %>%
+  filter(!is.na(review_scores_rating)) %>%   # quitar NA
+  group_by(neighbourhood_cleansed) %>%
+  summarise(
+    n = n(),                                      # n1 y n2
+    x = sum(review_scores_rating > 4),            # x1 y x2
+    p = mean(review_scores_rating > 4),           # p1 y p2
+  )
+```
+
+x = Numero de apartamentos con rating \> 4 n = numero total de apartamentos $\hat p$ = propocion $x/n$ Ahora, guardamos cada valor calculado en su respectivo lugar haciendo uso de filtros.
+
+```{r}
+# Palma de Mallorca
+n1 = props$n[props$neighbourhood_cleansed == "Palma de Mallorca"]
+x1 = props$x[props$neighbourhood_cleansed == "Palma de Mallorca"]
+p1 = props$p[props$neighbourhood_cleansed == "Palma de Mallorca"]
+
+# Pollença
+n2 = props$n[props$neighbourhood_cleansed == "Pollença"]
+x2 = props$x[props$neighbourhood_cleansed == "Pollença"]
+p2 = props$p[props$neighbourhood_cleansed == "Pollença"]
+
+```
+
+Con estos datos, somos capazes de ver que nos encontramos en el caso XIX debido a la independencia de las proporciones. Por lo que procedemos a calcular el siguiente estadistico" $\displaystyle Z=\frac{\hat p_1 - \hat p_2}{\sqrt{\hat p\hat q(\frac{1}{n_1}+\frac{1}{n_2})}}$ donde $\displaystyle \hat p = \frac{n_1\hat p_1 + n_2\hat p_2}{n_1+n_2}$ y $\hat q = 1- \hat p$.
+
+```{r}
+p = ((p1*n1)+(n2*p2))/(n1+n2)
+q = 1-p
+Z = (p1-p2)/sqrt(p*q*((1/n1)+(1/n2)))
+```
+
+Y, con lo cual, somos capaces de calcular el p-valor haciendo uso de: $\displaystyle 2·P(Z\geq |z|)$
+
+```{r}
+2*pnorm(Z, lower.tail = FALSE)
+```
+
+Nuestro p-valor (1.762434e\^-06), nos sale inferior al $\alpha = 0.05$ establecido anteriormente, por lo que rechazamos nuestra hipotesis nula, aceptando la alternativa, y por lo tanto podemos decir que las proporciones entre Palma de Mallorca y Pollença son diferentes para el periodo de tiempo de 2025-09-21. Para la comparacion final entre ambos, calcularemos el intervalo de confianza del 95% usando la formula del caso XIX: $\displaystyle ]\hat p_1 - \hat p_2-z_{0.975}·\sqrt{\hat p \hat q (\frac{1}{n_1}+\frac{1}{n_2})},\hat p_1 - \hat p_2 + z_{0.975}\sqrt{\hat p \hat q (\frac{1}{n_1}+\frac{1}{n_2})}[$.
+
+```{r}
+interval2 = c(p1-p2-qnorm(0.975)*sqrt(p*q*(1/n1+1/n2)),p1-p2+qnorm(0.975)*sqrt(p*q*(1/n1+1/n2))) #0.975 sale de hacer 1-(alpha=0.05/2)
+```
+
+**Interpretacion/Comprobacion entre ambos periodos**
+
+Entre ambos periodos, podemos ver que el p-valor del periodo 2025-06-15 es ligeramente superior al p-valor del periodo 2025-09-21. Para una vision mas detallada de lo que esta pasando, procedemos a visualizar los intervalos de confianza del 95% de ambos periodos:
+
+```{r}
+#Periodo 2025-06-15
+interval1
+#Periodo 2025-09-21
+interval2
+```
+
+El intervalo del periodo 2025-06-15 es: \[0.03738, 0.08939\], mientras que el del periodo 2025-09-21 es: \[0.03584, 0.08568\]. De forma apartada, ambos intervalos no incluyen el 0, por lo que corroboramos lo mencionado anteriormente de que rechazamos la hipotesis nula y adoptamos la alternativa en ambos casos. A la hora de interpretar estos intervalos, determinamos que en el primer intervalo, Pollença recibe aproximadamente de 3.738% a 8.939% mejores valoraciones que Palma de Mallorca en el periodo 2025-06-15. Mientras que en el segundo intervalo, Pollença recibe aproximadamente de 3.584% a 8.568% mejores valoraciones que Palma de Mallorca en el periodo 2025-09-21. Viendo estos porcentajes, vemos que los procentajes decrecen un 0.2% o 0.4% entre 2025-06-15 y 2025-09-21. Esto nos puede indicar que en el periodo 2025-09-21 Palma de Mallorca recibio mas valoraciones positivas, pero sin igualar o sobrepasar a Pollença; o que Pollença recibio mas valoraciones negativas o no tan buenas, pero sin igualar o ser sobrepasada por Palma de Mallorca.
 
 ## Pregunta 8 (**1punto**)
 
